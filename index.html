@@ -163,8 +163,37 @@
     *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
   }
 </style>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
+  <script>
+Papa.parse("data.csv", {
+    download: true,
+    header: true,
+    complete: function(results) {
+        const data = results.data;
+        const container = document.getElementById("tableContainer");
+        let table = document.createElement("table");
+        let headerRow = document.createElement("tr");
+        Object.keys(data[0]).forEach(key => {
+            let th = document.createElement("th");
+            th.innerText = key;
+            headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+        data.forEach(row => {
+            let tr = document.createElement("tr");
+            Object.values(row).forEach(val => {
+                let td = document.createElement("td");
+                td.innerText = val;
+                tr.appendChild(td);
+            });
+            table.appendChild(tr);
+        });
+        container.appendChild(table);
+    }
+});
+</script>
 <div class="app-shell">
   <header class="topbar">
     <button class="brand" type="button" data-page="home" aria-label="返回首页">
@@ -178,7 +207,7 @@
     <button class="upload-mini" id="uploadTop" type="button">导入数据 ↗</button>
     <input class="visually-hidden" type="file" id="csvFile" accept=".csv,text/csv">
   </header>
-
+  <div id="tableContainer"></div>
   <main>
     <section class="page active" id="page-home">
       <div class="hero">
