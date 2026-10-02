@@ -452,11 +452,10 @@
     return String(value).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
   }
   updateFileStatus();
-  // 页面加载自动读取根目录 data.csv
-window.addEventListener('DOMContentLoaded', async function(){
+ (async function loadAutoCsv(){
   try{
     const res = await fetch('data.csv');
-    if(!res.ok) throw new Error("找不到data.csv");
+    if(!res.ok) throw new Error("找不到csv");
     const text = await res.text();
     const parsed = parseData(text);
     state.rows = parsed;
@@ -464,9 +463,8 @@ window.addEventListener('DOMContentLoaded', async function(){
     renderRanking();
     updateFileStatus();
   }catch(err){
-    console.log("自动加载csv失败：",err);
+    console.error("自动加载失败",err);
   }
-});
 })();
 </script>
 </body>
