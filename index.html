@@ -166,7 +166,7 @@
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
-  <script>
+ <script>
 Papa.parse("data.csv", {
     download: true,
     header: true,
@@ -191,6 +191,20 @@ Papa.parse("data.csv", {
             table.appendChild(tr);
         });
         container.appendChild(table);
+
+        // 只在ranking页面展示这个自动加载的表格
+        function updateTableVisibility() {
+            const currentPage = document.querySelector(".nav-btn.active").dataset.page;
+            if(currentPage === "ranking"){
+                container.style.display = "block";
+            }else{
+                container.style.display = "none";
+            }
+        }
+        updateTableVisibility();
+        document.querySelectorAll(".nav-btn").forEach(btn=>{
+            btn.addEventListener("click", updateTableVisibility);
+        })
     }
 });
 </script>
@@ -207,7 +221,7 @@ Papa.parse("data.csv", {
     <button class="upload-mini" id="uploadTop" type="button">导入数据 ↗</button>
     <input class="visually-hidden" type="file" id="csvFile" accept=".csv,text/csv">
   </header>
-  <div id="tableContainer"></div>
+
   <main>
     <section class="page active" id="page-home">
       <div class="hero">
@@ -231,9 +245,11 @@ Papa.parse("data.csv", {
 
     <section class="page" id="page-ranking">
       <div class="section-head">
+
         <div><div class="section-kicker">01 / Leaderboard</div><h2>学习排行榜</h2><p class="section-desc">在这里，你可以查看不同标准下的排名。</p></div>
         <button class="button-secondary" id="uploadRanking" type="button">替换 CSV ↗</button>
       </div>
+      <div id="tableContainer"></div>
       <div class="panel ranking-panel">
         <div class="ranking-toolbar">
           <div class="tabs" role="tablist" aria-label="排行榜指标">
