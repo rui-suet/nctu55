@@ -252,11 +252,9 @@
 
   // ========= 可自行修改的首页文案 =========
   // 首页标题：修改 #page-home 中的 <h1> 内容。
-  // 公告内容：修改下方 ANNOUNCEMENT_TEXT。支持 \n 换行。
-  const ANNOUNCEMENT_TEXT = "在这里写下你的公告或寄语。\\n可以是一句话，也可以是一小段话。";
-  document.getElementById("announcementText").textContent = ANNOUNCEMENT_TEXT;
+  // 公告内容：直接修改上方 HTML 中 id="announcementText" 的那一行文字。
 
-  const state = { rows: [], metric: "minutes", fileName: "" };
+  const state = { rows: [], metric: "minutes", fileName: "", userLoaded: false };
   const fileInput = document.getElementById("csvFile");
   const metricNames = { days: "打卡天数", minutes: "学习分钟", words: "背词数量" };
   const fieldAliases = {
@@ -299,7 +297,7 @@
     return -1;
   }
   function parseNumber(value, label, lineNo) {
-    let cleaned = String(value ?? "").trim().replace(/,/g, "").replace(/\\s+/g, "");
+    let cleaned = String(value ?? "").trim().replace(/,/g, "").replace(/\s+/g, "");
     // Accept units used in the source CSV: 2天, 75分钟, 61词.
     if (label === "打卡天数") cleaned = cleaned.replace(/天$/, "");
     else if (label === "学习分钟") cleaned = cleaned.replace(/分钟$/, "").replace(/分$/, "");
@@ -360,6 +358,7 @@
       const text = await file.text();
       const parsed = parseData(text);
       state.rows = parsed;
+      state.userLoaded = true;
       state.fileName = file.name;
       renderRanking();
       updateFileStatus();
@@ -452,20 +451,64 @@
     return String(value).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
   }
   updateFileStatus();
-(async function loadAutoCsv(){
-  try{
-    const res = await fetch('./data.csv');
-    if(!res.ok) throw new Error("找不到csv");
-    const text = await res.text();
-    const parsed = parseData(text);
-    state.rows = parsed;
-    state.fileName = "data.csv";
-    renderRanking();
-    updateFileStatus();
-  }catch(err){
-    console.error("自动加载失败",err);
+
+  // ===== 自动加载 data.csv：超时 + 重试 + 防缓存 + 编码兜底 + 不破坏页面 =====
+  async function fetchCsvBuffer(url, timeoutMs) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { signal: ctrl.signal, cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return await res.arrayBuffer();
+    } finally {
+      clearTimeout(timer);
+    }
   }
-});
+  function decodeCsv(buf) {
+    const utf8 = new TextDecoder("utf-8").decode(buf);
+    if (!utf8.includes("\uFFFD")) return utf8;
+    try { return new TextDecoder("gbk").decode(buf); } catch (_) { return utf8; }
+  }
+  async function loadAutoCsv() {
+    const status = document.getElementById("homeFileStatus");
+    status.textContent = "正在自动加载数据…";
+    const delays = [0, 1500, 4000];            // 最多尝试 3 次
+    let buf = null;
+    for (const d of delays) {
+      if (d) await new Promise(r => setTimeout(r, d));
+      if (state.userLoaded) return;            // 用户已手动上传，不再覆盖
+      try {
+        buf = await fetchCsvBuffer("./data.csv?t=" + Date.now(), 12000);
+        break;
+      } catch (err) {
+        console.warn("自动加载失败，将重试：", err);
+      }
+    }
+    if (state.userLoaded) return;
+    if (buf) {
+      try {
+        state.rows = parseData(decodeCsv(buf));
+        state.fileName = "data.csv";
+        renderRanking();
+        updateFileStatus();
+        return;
+      } catch (err) {
+        console.error("data.csv 格式有误：", err);
+        status.textContent = "data.csv 格式有误：" + err.message + " · 可手动选择 CSV 文件";
+        return;
+      }
+    }
+    // 全部失败：提示 + 重试按钮，页面其余功能不受影响
+    status.textContent = "自动加载失败（网络较慢）· ";
+    const retry = document.createElement("button");
+    retry.type = "button";
+    retry.textContent = "点击重试";
+    retry.style.cssText = "border:0;background:none;color:#244c39;text-decoration:underline;padding:0;font-size:inherit;";
+    retry.addEventListener("click", loadAutoCsv);
+    status.appendChild(retry);
+    status.appendChild(document.createTextNode(" 或手动选择 CSV 文件"));
+  }
+  loadAutoCsv();
 })();
 </script>
 </body>
