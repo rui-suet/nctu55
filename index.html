@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#eaf5ed">
+<title>决战U队之巅 · NCT Next U</title>
+<style>
+  :root {
+    --paper: #f3f7f1;
+    --paper-2: #e7f1e7;
+    --mint: #c8e5d0;
+    --mint-strong: #a9d4b8;
+    --leaf: #679b7b;
+    --forest: #244c39;
+    --ink: #1f3328;
+    --muted: #718276;
+    --line: rgba(36,76,57,.16);
+    --white: #fbfdf9;
+    --shadow: 0 18px 50px rgba(36,76,57,.08);
+    --radius: 22px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--ink);
+    background: var(--paper);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input { font: inherit; }
+  button { cursor: pointer; }
+  .app-shell { min-height: 100vh; overflow: hidden; }
+  .topbar {
+    position: relative; z-index: 5; display: flex; align-items: center; justify-content: space-between;
+    width: min(1180px, calc(100% - 48px)); margin: 0 auto; padding: 24px 0;
+  }
+  .brand { display: flex; align-items: center; gap: 11px; border: 0; background: none; color: var(--forest); padding: 0; }
+  .brand-mark { width: 34px; height: 34px; border: 1px solid var(--forest); border-radius: 50%; display: grid; place-items: center; font-family: Georgia, serif; font-size: 19px; }
+  .brand-name { font-size: 12px; letter-spacing: .15em; text-transform: uppercase; font-weight: 700; }
+  .nav { display: flex; align-items: center; gap: 7px; }
+  .nav-btn {
+    border: 1px solid transparent; background: transparent; color: var(--muted); padding: 10px 15px;
+    border-radius: 999px; transition: color .25s ease, background .25s ease, transform .25s ease, border-color .25s ease;
+  }
+  .nav-btn:hover { color: var(--forest); background: rgba(200,229,208,.5); transform: translateY(-1px); }
+  .nav-btn.active { color: var(--forest); background: var(--white); border-color: var(--line); box-shadow: 0 3px 12px rgba(36,76,57,.04); }
+  .upload-mini { border: 1px solid var(--forest); color: var(--forest); padding: 10px 16px; border-radius: 999px; background: transparent; margin-left: 8px; transition: all .25s ease; }
+  .upload-mini:hover { background: var(--forest); color: white; transform: translateY(-2px); }
+  main { width: min(1180px, calc(100% - 48px)); margin: 0 auto 70px; }
+  .page { display: none; animation: pageIn .5s cubic-bezier(.2,.7,.2,1) both; }
+  .page.active { display: block; }
+  @keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .hero {
+    position: relative; isolation: isolate; min-height: 540px; border-radius: 30px; overflow: hidden;
+    background: #dceee0; padding: clamp(34px, 7vw, 88px); display: flex; flex-direction: column; justify-content: center;
+  }
+  .hero::before, .hero::after { content: ""; position: absolute; z-index: -1; pointer-events: none; }
+  .hero::before {
+    width: 620px; height: 620px; right: -100px; top: -190px; border: 1px solid rgba(36,76,57,.17); border-radius: 50%;
+    box-shadow: 0 0 0 45px rgba(36,76,57,.025), 0 0 0 95px rgba(36,76,57,.025), 0 0 0 150px rgba(36,76,57,.02);
+    animation: orbit 42s linear infinite;
+  }
+  .hero::after {
+    width: 360px; height: 360px; right: 10%; bottom: -230px; border: 1px solid rgba(36,76,57,.22);
+    transform: rotate(35deg); border-radius: 44% 56% 58% 42%; animation: drift 24s ease-in-out infinite alternate;
+  }
+  .orbit-dot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--leaf); opacity: .55; }
+  .dot-one { right: 24%; top: 24%; animation: float 9s ease-in-out infinite; }
+  .dot-two { right: 13%; top: 54%; width: 4px; height: 4px; animation: float 12s ease-in-out infinite reverse; }
+  .dot-three { right: 38%; bottom: 18%; width: 5px; height: 5px; animation: float 11s ease-in-out infinite; }
+  @keyframes orbit { to { transform: rotate(360deg); } }
+  @keyframes drift { from { transform: rotate(20deg) translate3d(0,0,0); } to { transform: rotate(42deg) translate3d(-22px,-12px,0); } }
+  @keyframes float { 0%,100% { transform: translate(0,0); } 50% { transform: translate(9px,-17px); } }
+  .eyebrow { display: flex; align-items: center; gap: 10px; color: var(--forest); text-transform: uppercase; letter-spacing: .17em; font-size: 11px; font-weight: 700; margin-bottom: 28px; }
+  .eyebrow::before { content: ""; width: 30px; height: 1px; background: currentColor; }
+  .hero h1 { max-width: 680px; font-family: Georgia, "Songti SC", "STSong", serif; font-weight: 500; letter-spacing: -.045em; font-size: clamp(48px, 8vw, 94px); line-height: 1.04; margin: 0; color: var(--forest); animation: titleFloat 7s ease-in-out infinite; transform-origin: left center; }
+  @keyframes titleFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+  .hero h1 em { font-weight: 400; color: #5b9271; }
+  .hero-sub { margin: 25px 0 0; color: #5d7664; font-size: 15px; line-height: 1.9; max-width: 430px; }
+  .hero-actions { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-top: 35px; }
+  .button-primary, .button-secondary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 48px; padding: 0 22px;
+    border-radius: 999px; transition: transform .25s ease, background .25s ease, box-shadow .25s ease; border: 1px solid var(--forest);
+  }
+  .button-primary { background: var(--forest); color: #f7fbf6; box-shadow: 0 8px 20px rgba(36,76,57,.12); }
+  .button-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(36,76,57,.2); background: #315e47; }
+  .button-secondary { background: rgba(251,253,249,.38); color: var(--forest); border-color: rgba(36,76,57,.3); }
+  .button-secondary:hover { transform: translateY(-2px); background: rgba(251,253,249,.8); }
+  button:focus-visible, input:focus-visible { outline: 3px solid rgba(103,155,123,.42); outline-offset: 3px; }
+  .announcement {
+    margin-top: 22px; padding: 24px 28px; display: grid; grid-template-columns: 110px 1fr; gap: 22px;
+    border: 1px solid var(--line); border-radius: var(--radius); background: rgba(251,253,249,.65);
+  }
+  .announcement-label { color: var(--leaf); font-size: 11px; letter-spacing: .16em; font-weight: 800; padding-top: 3px; }
+  .announcement-copy { color: #536b5b; line-height: 1.8; font-size: 14px; white-space: pre-wrap; }
+  .section-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin: 35px 0 24px; }
+  .section-kicker { color: var(--leaf); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; font-weight: 800; margin-bottom: 10px; }
+  h2 { font-family: Georgia, "Songti SC", "STSong", serif; font-weight: 500; font-size: clamp(32px, 5vw, 48px); letter-spacing: -.035em; margin: 0; color: var(--forest); }
+  .section-desc { color: var(--muted); margin: 11px 0 0; font-size: 14px; line-height: 1.8; }
+  .panel { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+  .ranking-panel { padding: clamp(18px, 3vw, 32px); }
+  .ranking-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  .tabs { display: flex; gap: 5px; padding: 5px; border-radius: 999px; background: #edf4ed; flex-wrap: wrap; }
+  .tab { border: 0; color: var(--muted); background: transparent; padding: 11px 17px; border-radius: 999px; transition: all .2s ease; font-size: 13px; }
+  .tab:hover { color: var(--forest); }
+  .tab.active { background: var(--forest); color: white; box-shadow: 0 3px 9px rgba(36,76,57,.12); }
+  .sort-note { color: var(--muted); font-size: 12px; display: flex; align-items: center; gap: 8px; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 480px; }
+  th { font-size: 11px; letter-spacing: .08em; font-weight: 700; color: #809084; text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  td { padding: 16px; border-bottom: 1px solid rgba(36,76,57,.08); font-size: 14px; }
+  tbody tr { transition: background .2s ease; }
+  tbody tr:hover { background: #f2f8f1; }
+  tbody tr:last-child td { border-bottom: 0; }
+  .rank-number { color: #8ca394; font-variant-numeric: tabular-nums; width: 64px; }
+  .rank-number.top { color: var(--forest); font-weight: 800; }
+  .id-cell { font-weight: 700; letter-spacing: .025em; }
+  .metric-cell { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--forest); }
+  .empty-state { text-align: center; padding: 66px 20px; color: var(--muted); }
+  .empty-icon { width: 52px; height: 52px; border: 1px solid var(--line); border-radius: 50%; display: grid; place-items: center; margin: 0 auto 18px; color: var(--leaf); font-size: 22px; }
+  .empty-state h3 { color: var(--forest); font-weight: 600; margin: 0 0 8px; font-size: 17px; }
+  .empty-state p { font-size: 13px; line-height: 1.8; margin: 0 auto 20px; max-width: 390px; }
+  .search-panel { padding: clamp(22px, 4vw, 42px); }
+  .search-form { display: flex; gap: 10px; max-width: 660px; margin-top: 28px; }
+  .search-input { min-width: 0; flex: 1; height: 52px; padding: 0 18px; border: 1px solid var(--line); background: #f7faf5; color: var(--ink); border-radius: 999px; outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
+  .search-input:focus { border-color: var(--leaf); box-shadow: 0 0 0 4px rgba(103,155,123,.1); }
+  .result-card { margin-top: 26px; display: none; }
+  .result-card.show { display: block; animation: pageIn .35s ease both; }
+  .result-top { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 24px 26px; border-bottom: 1px solid var(--line); }
+  .result-id { font-family: Georgia, serif; font-size: 30px; color: var(--forest); }
+  .result-label { color: var(--muted); font-size: 12px; }
+  .result-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; }
+  .result-stat { background: var(--white); padding: 24px; }
+  .result-stat span { color: var(--muted); font-size: 12px; display: block; margin-bottom: 14px; }
+  .result-stat strong { color: var(--forest); font-size: clamp(22px, 3vw, 32px); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .message { margin-top: 14px; font-size: 13px; color: #9a6745; min-height: 18px; }
+  .file-status { font-size: 12px; color: var(--muted); margin-top: 12px; }
+  .footer { display: flex; justify-content: space-between; align-items: center; gap: 18px; border-top: 1px solid var(--line); margin-top: 45px; padding-top: 20px; color: #849387; font-size: 11px; letter-spacing: .04em; }
+  .footer-mark { font-family: Georgia, serif; font-style: italic; color: var(--leaf); font-size: 14px; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  @media (max-width: 700px) {
+    .topbar { width: calc(100% - 28px); padding: 17px 0; flex-wrap: wrap; gap: 15px; }
+    .brand-name { font-size: 10px; }
+    .nav { order: 3; width: 100%; justify-content: space-between; }
+    .nav-btn { padding: 9px 11px; font-size: 12px; }
+    .upload-mini { margin-left: 0; padding: 9px 12px; font-size: 12px; }
+    main { width: calc(100% - 28px); }
+    .hero { min-height: 500px; border-radius: 23px; padding: 32px 25px; }
+    .hero::before { right: -370px; top: -120px; }
+    .hero::after { right: -15%; }
+    .hero h1 { font-size: clamp(48px, 14vw, 72px); }
+    .announcement { grid-template-columns: 1fr; gap: 10px; padding: 20px; }
+    .section-head { align-items: start; flex-direction: column; }
+    .search-form { flex-direction: column; }
+    .search-form .button-primary { width: 100%; }
+    .result-grid { grid-template-columns: 1fr; }
+    .result-stat { padding: 19px 22px; }
+    .result-stat span { margin-bottom: 7px; }
+    .footer { align-items: flex-start; flex-direction: column; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <button class="brand" type="button" data-page="home" aria-label="返回首页">
+      <span class="brand-mark">划</span><span class="brand-name">Vocabulary Garden</span>
+    </button>
+    <nav class="nav" aria-label="主导航">
+      <button class="nav-btn active" type="button" data-page="home">首页 / HOME</button>
+      <button class="nav-btn" type="button" data-page="ranking">学习排行榜</button>
+      <button class="nav-btn" type="button" data-page="search">个人查询</button>
+    </nav>
+    <button class="upload-mini" id="uploadTop" type="button">导入数据 ↗</button>
+    <input class="visually-hidden" type="file" id="csvFile" accept=".csv,text/csv">
+  </header>
+
+  <main>
+    <section class="page active" id="page-home">
+      <div class="hero">
+        <span class="orbit-dot dot-one"></span><span class="orbit-dot dot-two"></span><span class="orbit-dot dot-three"></span>
+        <div class="eyebrow">A little progress, every day</div>
+        <!-- 在这里修改首页企划标题 -->
+        <h1>划人就要划<br><em>西珍妮就要背。</em></h1>
+        <p class="hero-sub">Beautiful，beautiful<br>you are.</p>
+        <div class="hero-actions">
+          <button class="button-primary" id="enterRanking" type="button">进入学习排行榜 <span aria-hidden="true">↗</span></button>
+          <button class="button-secondary" id="heroUpload" type="button">选择 CSV 文件</button>
+        </div>
+        <div class="file-status" id="homeFileStatus" aria-live="polite">尚未导入数据 · 请先选择 CSV 文件</div>
+      </div>
+      <aside class="announcement">
+        <div class="announcement-label">NOTICE / 公告</div>
+        <!-- 在这里直接修改公告内容；支持换行 -->
+        <div class="announcement-copy" id="announcementText">历时8.1——9.30，感谢大家参加这次企划。希望你有所收获呀～</div>
+      </aside>
+    </section>
+
+    <section class="page" id="page-ranking">
+      <div class="section-head">
+        <div><div class="section-kicker">01 / Leaderboard</div><h2>学习排行榜</h2><p class="section-desc">在这里，你可以查看不同标准下的排名。</p></div>
+        <button class="button-secondary" id="uploadRanking" type="button">替换 CSV ↗</button>
+      </div>
+      <div class="panel ranking-panel">
+        <div class="ranking-toolbar">
+          <div class="tabs" role="tablist" aria-label="排行榜指标">
+            <button class="tab active" type="button" role="tab" aria-selected="true" data-metric="minutes">学习分钟</button>
+            <button class="tab" type="button" role="tab" aria-selected="false" data-metric="words">背词数量</button>
+            <button class="tab" type="button" role="tab" aria-selected="false" data-metric="days">打卡天数</button>
+          </div>
+          <div class="sort-note"><span aria-hidden="true">↓</span> 默认从高到低排序 <span id="rowCount"></span></div>
+        </div>
+        <div id="rankingContent">
+          <div class="empty-state"><div class="empty-icon">↥</div><h3>等待数据生长</h3><p>导入包含 ID、打卡天数、学习分钟、背词数量四列的 CSV 文件后，排行榜会自动生成。</p><button class="button-primary" type="button" id="emptyUpload">导入 CSV 文件 ↗</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-search">
+      <div class="section-head">
+        <div><div class="section-kicker">02 / Individual record</div><h2>个人数据查询</h2><p class="section-desc">输入 ID，找到这段学习旅程里的个人记录。</p></div>
+      </div>
+      <div class="panel search-panel">
+        <label for="idInput" class="section-kicker">SEARCH BY ID</label>
+        <form class="search-form" id="searchForm">
+          <input class="search-input" id="idInput" type="text" placeholder="请输入 ID，例如 SC001" autocomplete="off" spellcheck="false">
+          <button class="button-primary" type="submit">查询记录 <span aria-hidden="true">↗</span></button>
+        </form>
+        <div class="message" id="searchMessage" aria-live="polite"></div>
+        <div class="result-card panel" id="resultCard">
+          <div class="result-top"><div><div class="result-label">PERSONAL RECORD</div><div class="result-id" id="resultId">—</div></div><div class="result-label">学习数据</div></div>
+          <div class="result-grid">
+            <div class="result-stat"><span>打卡天数</span><strong id="resultDays">—</strong></div>
+            <div class="result-stat"><span>学习分钟</span><strong id="resultMinutes">—</strong></div>
+            <div class="result-stat"><span>背词数量</span><strong id="resultWords">—</strong></div>
+          </div>
+        </div>
+        <div class="empty-state" id="searchEmpty"><div class="empty-icon">⌕</div><h3>从一个 ID 开始</h3><p>查询结果只显示对应 ID 的数据，不会在这里公开其他人的记录。</p></div>
+      </div>
+    </section>
+
+    <footer class="footer"><span>VOCABULARY GARDEN · LEARN AT YOUR OWN PACE</span><span class="footer-mark">little by little, leaf by leaf.</span></footer>
+  </main>
+</div>
+<script>
+(() => {
+  "use strict";
+
+  // ========= 可自行修改的首页文案 =========
+  // 首页标题：修改 #page-home 中的 <h1> 内容。
+  // 公告内容：修改下方 ANNOUNCEMENT_TEXT。支持 \n 换行。
+  const ANNOUNCEMENT_TEXT = "在这里写下你的公告或寄语。\\n可以是一句话，也可以是一小段话。";
+  document.getElementById("announcementText").textContent = ANNOUNCEMENT_TEXT;
+
+  const state = { rows: [], metric: "minutes", fileName: "" };
+  const fileInput = document.getElementById("csvFile");
+  const metricNames = { days: "打卡天数", minutes: "学习分钟", words: "背词数量" };
+  const fieldAliases = {
+    id: ["id", "编号", "用户id", "用户ID", "学号", "ID"],
+    days: ["打卡天数", "打卡天数(天)", "打卡", "天数", "签到天数", "连续打卡天数"],
+    minutes: ["学习分钟", "背词学习分钟", "背词学习分钟数", "学习时长", "学习时长(分钟)", "分钟", "总分钟数"],
+    words: ["背词数量", "背词数", "单词数量", "单词数", "背诵词数", "词数", "学习词数"]
+  };
+
+  function normalizeHeader(s) {
+    return String(s ?? "").replace(/^\uFEFF/, "").trim().replace(/\s+/g, "").toLowerCase();
+  }
+  function parseCSV(text) {
+    // Supports quoted cells, commas/newlines inside quotes, CRLF and UTF-8 BOM.
+    text = text.replace(/^\uFEFF/, "");
+    const rows = [];
+    let row = [], cell = "", quoted = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (quoted) {
+        if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+        else if (c === '"') quoted = false;
+        else cell += c;
+      } else {
+        if (c === '"') quoted = true;
+        else if (c === ",") { row.push(cell); cell = ""; }
+        else if (c === "\n") { row.push(cell.replace(/\r$/, "")); rows.push(row); row = []; cell = ""; }
+        else cell += c;
+      }
+    }
+    if (cell.length || row.length) { row.push(cell.replace(/\r$/, "")); rows.push(row); }
+    return rows.filter(r => r.some(c => String(c).trim() !== ""));
+  }
+  function findColumn(headers, aliases) {
+    const normalized = headers.map(normalizeHeader);
+    for (const alias of aliases) {
+      const i = normalized.indexOf(normalizeHeader(alias));
+      if (i !== -1) return i;
+    }
+    return -1;
+  }
+  function parseNumber(value, label, lineNo) {
+    let cleaned = String(value ?? "").trim().replace(/,/g, "").replace(/\\s+/g, "");
+    // Accept units used in the source CSV: 2天, 75分钟, 61词.
+    if (label === "打卡天数") cleaned = cleaned.replace(/天$/, "");
+    else if (label === "学习分钟") cleaned = cleaned.replace(/分钟$/, "").replace(/分$/, "");
+    else if (label === "背词数量") cleaned = cleaned.replace(/词$/, "");
+    if (cleaned === "") throw new Error(`第 ${lineNo} 行的「${label}」为空。`);
+    const n = Number(cleaned);
+    if (!Number.isFinite(n) || n < 0) throw new Error(`第 ${lineNo} 行的「${label}」不是有效的非负数字。`);
+    return n;
+  }
+  function parseData(csvText) {
+    const table = parseCSV(csvText);
+    if (table.length < 2) throw new Error("文件中没有可读取的数据，请检查 CSV 是否包含表头和数据行。");
+    const headers = table[0];
+    const indexes = {};
+    for (const key of Object.keys(fieldAliases)) indexes[key] = findColumn(headers, fieldAliases[key]);
+    const missing = Object.keys(indexes).filter(k => indexes[k] === -1);
+    if (missing.length) {
+      const names = { id: "ID", days: "打卡天数", minutes: "学习分钟", words: "背词数量" };
+      throw new Error("找不到这些必要列：" + missing.map(k => names[k]).join("、") + "。请检查 CSV 第一行表头。");
+    }
+    const output = [];
+    for (let i = 1; i < table.length; i++) {
+      const cells = table[i];
+      const id = String(cells[indexes.id] ?? "").trim();
+      if (!id) continue;
+      output.push({
+        id,
+        days: parseNumber(cells[indexes.days], "打卡天数", i + 1),
+        minutes: parseNumber(cells[indexes.minutes], "学习分钟", i + 1),
+        words: parseNumber(cells[indexes.words], "背词数量", i + 1)
+      });
+    }
+    if (!output.length) throw new Error("没有找到有效数据行，请确认 ID 列不为空。");
+    // Duplicate IDs are allowed: multiple records may share the same ID.
+    return output;
+  }
+  function showPage(page) {
+    document.querySelectorAll(".page").forEach(el => el.classList.toggle("active", el.id === "page-" + page));
+    document.querySelectorAll("[data-page]").forEach(el => {
+      const active = el.dataset.page === page;
+      if (el.classList.contains("nav-btn")) {
+        el.classList.toggle("active", active);
+        el.setAttribute("aria-current", active ? "page" : "false");
+      }
+    });
+    if (page === "ranking") renderRanking();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  document.querySelectorAll("[data-page]").forEach(btn => btn.addEventListener("click", () => showPage(btn.dataset.page)));
+  document.getElementById("enterRanking").addEventListener("click", () => showPage("ranking"));
+  function askForFile() { fileInput.click(); }
+  ["uploadTop", "heroUpload", "uploadRanking", "emptyUpload"].forEach(id => document.getElementById(id).addEventListener("click", askForFile));
+
+  fileInput.addEventListener("change", async (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = parseData(text);
+      state.rows = parsed;
+      state.fileName = file.name;
+      renderRanking();
+      updateFileStatus();
+      document.getElementById("searchMessage").textContent = "";
+      document.getElementById("resultCard").classList.remove("show");
+      document.getElementById("searchEmpty").style.display = "";
+      alert(`数据导入成功！已读取 ${parsed.length} 条记录。`);
+    } catch (error) {
+      alert("导入失败：\n" + error.message);
+    } finally {
+      // Allows selecting the same file again if it has been updated.
+      fileInput.value = "";
+    }
+  });
+  function updateFileStatus() {
+    const message = state.rows.length
+      ? `已载入 ${state.rows.length} 条记录 · ${state.fileName}（可随时替换）`
+      : "尚未导入数据 · 请先选择 CSV 文件";
+    document.getElementById("homeFileStatus").textContent = message;
+    document.getElementById("rowCount").textContent = state.rows.length ? `· ${state.rows.length} 条记录` : "";
+  }
+  function renderRanking() {
+    const target = document.getElementById("rankingContent");
+    updateFileStatus();
+    if (!state.rows.length) {
+      target.innerHTML = '<div class="empty-state"><div class="empty-icon">↥</div><h3>等待数据生长</h3><p>导入包含 ID、打卡天数、学习分钟、背词数量四列的 CSV 文件后，排行榜会自动生成。</p><button class="button-primary" type="button" id="emptyUploadAgain">导入 CSV 文件 ↗</button></div>';
+      document.getElementById("emptyUploadAgain").addEventListener("click", askForFile);
+      return;
+    }
+    const sorted = [...state.rows].sort((a, b) => (b[state.metric] - a[state.metric]) || a.id.localeCompare(b.id, "zh-CN", { numeric: true }));
+    const rowsHTML = sorted.map((r, i) => `
+      <tr>
+        <td class="rank-number ${i < 3 ? "top" : ""}">${String(i + 1).padStart(2, "0")}</td>
+        <td class="id-cell">${escapeHTML(r.id)}</td>
+        <td class="metric-cell">${formatNumber(r[state.metric])}${state.metric === "minutes" ? " 分钟" : state.metric === "words" ? " 词" : " 天"}</td>
+        <td>${formatNumber(r.days)} 天</td>
+        <td>${formatNumber(r.minutes)} 分钟</td>
+        <td>${formatNumber(r.words)} 词</td>
+      </tr>`).join("");
+    target.innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>排名</th><th>ID</th><th>${metricNames[state.metric]}</th><th>打卡天数</th><th>学习分钟</th><th>背词数量</th></tr></thead>
+          <tbody>${rowsHTML}</tbody>
+        </table>
+      </div>`;
+  }
+  document.querySelectorAll("[data-metric]").forEach(btn => btn.addEventListener("click", () => {
+    state.metric = btn.dataset.metric;
+    document.querySelectorAll("[data-metric]").forEach(tab => {
+      const active = tab === btn;
+      tab.classList.toggle("active", active);
+      tab.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    renderRanking();
+  }));
+  document.getElementById("searchForm").addEventListener("submit", (event) => {
+    event.preventDefault();
+    const id = document.getElementById("idInput").value.trim();
+    const message = document.getElementById("searchMessage");
+    const card = document.getElementById("resultCard");
+    const empty = document.getElementById("searchEmpty");
+    card.classList.remove("show");
+    if (!state.rows.length) {
+      message.textContent = "请先导入 CSV 文件，再查询个人记录。";
+      empty.style.display = "";
+      return;
+    }
+    if (!id) {
+      message.textContent = "请输入要查询的 ID。";
+      empty.style.display = "";
+      return;
+    }
+    const found = state.rows.find(r => r.id.toLocaleLowerCase() === id.toLocaleLowerCase());
+    if (!found) {
+      message.textContent = "没有找到这个 ID，请检查输入是否正确。";
+      empty.style.display = "none";
+      return;
+    }
+    message.textContent = "";
+    empty.style.display = "none";
+    document.getElementById("resultId").textContent = found.id;
+    document.getElementById("resultDays").textContent = formatNumber(found.days) + " 天";
+    document.getElementById("resultMinutes").textContent = formatNumber(found.minutes) + " 分钟";
+    document.getElementById("resultWords").textContent = formatNumber(found.words) + " 词";
+    card.classList.add("show");
+  });
+  function formatNumber(n) { return Number(n).toLocaleString("zh-CN", { maximumFractionDigits: 2 }); }
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  }
+  updateFileStatus();
+})();
+</script>
+</body>
+</html>
