@@ -452,9 +452,9 @@
     return String(value).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
   }
   updateFileStatus();
- (async function loadAutoCsv(){
+(async function loadAutoCsv(){
   try{
-    const res = await fetch('data.csv');
+    const res = await fetch('./data.csv');
     if(!res.ok) throw new Error("找不到csv");
     const text = await res.text();
     const parsed = parseData(text);
